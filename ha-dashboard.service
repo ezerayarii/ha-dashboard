@@ -1,0 +1,18 @@
+[Unit]
+Description=HA Dashboard — Smart Home Control Panel
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/ha-dashboard
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=ha-dashboard
+EnvironmentFile=/home/pi/ha-dashboard/.env
+
+[Install]
+WantedBy=multi-user.target

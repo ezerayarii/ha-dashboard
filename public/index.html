@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Home Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">⌂</span>
+        <span class="logo-text" id="dashboard-name">Home</span>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#dashboard" class="nav-link active" data-page="dashboard">
+        <span class="nav-icon">◈</span><span class="nav-label">Dashboard</span>
+      </a></li>
+      <li><a href="#devices" class="nav-link" data-page="devices">
+        <span class="nav-icon">◉</span><span class="nav-label">Devices</span>
+      </a></li>
+      <li><a href="#camera" class="nav-link" data-page="camera">
+        <span class="nav-icon">◎</span><span class="nav-label">Camera</span>
+      </a></li>
+      <li><a href="#commands" class="nav-link" data-page="commands">
+        <span class="nav-icon">◆</span><span class="nav-label">Commands</span>
+      </a></li>
+      <li><a href="#automations" class="nav-link" data-page="automations">
+        <span class="nav-icon">◇</span><span class="nav-label">Automations</span>
+      </a></li>
+      <li><a href="#settings" class="nav-link" data-page="settings">
+        <span class="nav-icon">◐</span><span class="nav-label">Settings</span>
+      </a></li>
+    </ul>
+
+    <div class="sidebar-status">
+      <div class="status-dot" id="ha-status-dot"></div>
+      <span id="ha-status-label">Connecting…</span>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <section id="page-dashboard" class="page active">
+      <header class="page-header">
+        <h1>Dashboard</h1>
+        <div class="header-meta">
+          <span id="current-time" class="mono"></span>
+          <button class="btn btn-ghost" onclick="app.refreshAll()">↻ Refresh</button>
+        </div>
+      </header>
+
+      <!-- Quick Actions -->
+      <div class="section-label">Quick Actions</div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="app.quickAction('lights_on')" title="All Lights On">
+          <span class="qb-icon">☀</span>
+          <span class="qb-label">Lights On</span>
+        </button>
+        <button class="quick-btn" onclick="app.quickAction('lights_off')" title="All Lights Off">
+          <span class="qb-icon">☽</span>
+          <span class="qb-label">Lights Off</span>
+        </button>
+        <button class="quick-btn" onclick="app.quickAction('tv_on')" title="TV On">
+          <span class="qb-icon">▶</span>
+          <span class="qb-label">TV On</span>
+        </button>
+        <button class="quick-btn" onclick="app.quickAction('tv_off')" title="TV Off">
+          <span class="qb-icon">◼</span>
+          <span class="qb-label">TV Off</span>
+        </button>
+        <button class="quick-btn" onclick="app.quickAction('night_mode')" title="Night Mode">
+          <span class="qb-icon">★</span>
+          <span class="qb-label">Night</span>
+        </button>
+        <button class="quick-btn" onclick="app.quickAction('movie_mode')" title="Movie Mode">
+          <span class="qb-icon">◑</span>
+          <span class="qb-label">Movie</span>
+        </button>
+        <button class="quick-btn" onclick="app.navigateTo('camera')" title="Camera">
+          <span class="qb-icon">◎</span>
+          <span class="qb-label">Camera</span>
+        </button>
+        <button class="quick-btn" onclick="app.restartCheck()" title="System Status">
+          <span class="qb-icon">⚙</span>
+          <span class="qb-label">System</span>
+        </button>
+      </div>
+
+      <!-- Device Grid -->
+      <div class="section-label">Active Devices</div>
+      <div class="device-grid" id="dashboard-devices">
+        <div class="loading-placeholder">Loading devices…</div>
+      </div>
+
+      <!-- System Info Bar -->
+      <div class="section-label">System</div>
+      <div class="system-bar" id="system-bar">
+        <div class="sys-item"><span class="sys-label">HA Status</span><span class="sys-val" id="sys-ha">—</span></div>
+        <div class="sys-item"><span class="sys-label">Pi Uptime</span><span class="sys-val" id="sys-uptime">—</span></div>
+        <div class="sys-item"><span class="sys-label">Temperature</span><span class="sys-val" id="sys-temp">—</span></div>
+        <div class="sys-item"><span class="sys-label">Camera</span><span class="sys-val" id="sys-camera">—</span></div>
+      </div>
+    </section>
+
+    <!-- ── DEVICES PAGE ── -->
+    <section id="page-devices" class="page">
+      <header class="page-header">
+        <h1>Devices</h1>
+        <div class="header-meta">
+          <select id="domain-filter" class="select-sm" onchange="app.filterDevices(this.value)">
+            <option value="all">All domains</option>
+            <option value="light">Lights</option>
+            <option value="switch">Switches</option>
+            <option value="media_player">Media Players</option>
+            <option value="sensor">Sensors</option>
+            <option value="binary_sensor">Binary Sensors</option>
+          </select>
+          <button class="btn btn-ghost" onclick="app.loadDevices()">↻</button>
+        </div>
+      </header>
+      <div class="device-list" id="devices-list">
+        <div class="loading-placeholder">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ── CAMERA PAGE ── -->
+    <section id="page-camera" class="page">
+      <header class="page-header">
+        <h1>Camera</h1>
+        <button class="btn btn-ghost" onclick="app.loadCamera()">↻ Refresh</button>
+      </header>
+
+      <!-- Status bar -->
+      <div id="camera-status-card" class="camera-status-card">
+        <div class="loading-placeholder">Detecting camera…</div>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="cam-tabs">
+        <button class="cam-tab active" onclick="app.camTab('stream', this)">Live Stream</button>
+        <button class="cam-tab" onclick="app.camTab('snapshot', this)">Snapshot</button>
+        <button class="cam-tab" onclick="app.camTab('setup', this)">Setup</button>
+      </div>
+
+      <!-- Tab: Live Stream -->
+      <div class="cam-panel" id="cam-panel-stream">
+        <div class="camera-viewer" id="camera-viewer">
+          <div class="camera-placeholder">
+            <div class="cam-icon">◎</div>
+            <p>Loading…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Snapshot -->
+      <div class="cam-panel" id="cam-panel-snapshot" style="display:none">
+        <div class="camera-viewer" id="camera-snapshot-viewer">
+          <div class="camera-placeholder">
+            <div class="cam-icon">◎</div>
+            <p>Click to take a snapshot</p>
+          </div>
+        </div>
+        <div style="margin-top:1rem; display:flex; gap:.75rem; align-items:center; flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="app.takeSnapshot()">&#x1F4F7; Take Snapshot</button>
+          <span id="snapshot-time" style="font-size:.8rem; color:var(--text-muted)"></span>
+        </div>
+      </div>
+
+      <!-- Tab: Setup -->
+      <div class="cam-panel" id="cam-panel-setup" style="display:none">
+        <div class="settings-grid" style="margin-top:0">
+          <div class="settings-card">
+            <h3>Stream URL</h3>
+            <p style="font-size:.82rem; color:var(--text-muted); margin-bottom:.75rem">
+              Point to any MJPEG stream — mjpeg-streamer on Pi, IP camera, or Home Assistant camera feed.
+            </p>
+            <label class="form-label">Stream URL</label>
+            <input type="url" id="cam-stream-url" class="form-input mono"
+              placeholder="http://raspberrypi.local:8081/?action=stream" />
+            <label class="form-label">Snapshot URL (optional)</label>
+            <input type="url" id="cam-snapshot-url" class="form-input mono"
+              placeholder="http://raspberrypi.local:8081/?action=snapshot" />
+            <button class="btn btn-primary" style="margin-top:.85rem" onclick="app.saveCamUrls()">Save &amp; Connect</button>
+          </div>
+
+          <div class="settings-card">
+            <h3>Pi Setup Commands</h3>
+            <p style="font-size:.82rem; color:var(--text-muted); margin-bottom:.75rem">
+              Run these on your Raspberry Pi to start the camera stream:
+            </p>
+            <div class="code-block">sudo apt-get install mjpeg-streamer</div>
+            <div class="code-block" style="margin-top:.5rem">./scripts/start-camera-stream.sh</div>
+            <p style="font-size:.78rem; color:var(--text-muted); margin-top:.75rem">
+              Then set Stream URL above to:<br>
+              <code style="color:var(--accent)">http://&lt;pi-ip&gt;:8081/?action=stream</code>
+            </p>
+          </div>
+
+          <div class="settings-card">
+            <h3>Detected Devices</h3>
+            <div id="camera-info"><div class="loading-placeholder">Scanning…</div></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── COMMANDS PAGE ── -->
+    <section id="page-commands" class="page">
+      <header class="page-header">
+        <h1>Commands</h1>
+      </header>
+      <div class="command-center">
+        <div class="command-input-area">
+          <div class="command-prompt">
+            <span class="prompt-symbol mono">❯</span>
+            <input type="text" id="command-input" class="command-input mono"
+              placeholder="Type a command… e.g. 'turn on lights'" autocomplete="off"
+              onkeydown="if(event.key==='Enter') app.sendCommand()" />
+            <button class="btn btn-primary" onclick="app.sendCommand()">Run</button>
+          </div>
+          <div class="command-result" id="command-result"></div>
+        </div>
+
+        <div class="section-label">Available Commands</div>
+        <div class="command-list" id="command-list">
+          <div class="loading-placeholder">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── AUTOMATIONS PAGE ── -->
+    <section id="page-automations" class="page">
+      <header class="page-header">
+        <h1>Automations</h1>
+        <button class="btn btn-primary" onclick="app.showAddAutomation()">+ Add Rule</button>
+      </header>
+
+      <div class="section-label">Home Assistant Automations</div>
+      <div id="ha-automations-list" class="automation-list">
+        <div class="loading-placeholder">Loading…</div>
+      </div>
+
+      <div class="section-label" style="margin-top:2rem">Local Rules</div>
+      <div id="local-automations-list" class="automation-list">
+        <div class="loading-placeholder">Loading…</div>
+      </div>
+
+      <!-- Add Automation Modal -->
+      <div class="modal" id="add-automation-modal" style="display:none">
+        <div class="modal-box">
+          <h2>New Automation Rule</h2>
+          <label class="form-label">Name</label>
+          <input type="text" id="auto-name" class="form-input" placeholder="e.g. Movie Night" />
+          <label class="form-label">Trigger Phrase</label>
+          <input type="text" id="auto-trigger" class="form-input" placeholder="e.g. movie mode" />
+          <label class="form-label">Actions (JSON)</label>
+          <textarea id="auto-actions" class="form-input mono" rows="4" placeholder='[{"domain":"light","service":"turn_off","entity_id":"all"}]'></textarea>
+          <div class="modal-actions">
+            <button class="btn btn-ghost" onclick="app.hideModal('add-automation-modal')">Cancel</button>
+            <button class="btn btn-primary" onclick="app.saveAutomation()">Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS PAGE ── -->
+    <section id="page-settings" class="page">
+      <header class="page-header">
+        <h1>Settings</h1>
+        <button class="btn btn-primary" onclick="app.saveSettings()">Save</button>
+      </header>
+
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>Home Assistant</h3>
+          <label class="form-label">URL</label>
+          <input type="url" id="set-ha-url" class="form-input" placeholder="http://homeassistant.local:8123" />
+          <label class="form-label">Token (set in .env — not shown here)</label>
+          <input type="text" class="form-input" disabled placeholder="Set HA_TOKEN in your .env file" style="opacity:.4" />
+          <button class="btn btn-ghost" style="margin-top:.75rem" onclick="app.testHA()">Test Connection</button>
+          <div id="ha-test-result" style="margin-top:.5rem; font-size:.85rem;"></div>
+        </div>
+
+        <div class="settings-card">
+          <h3>Camera</h3>
+          <label class="form-label">Device Path</label>
+          <input type="text" id="set-camera-device" class="form-input mono" placeholder="/dev/video0" />
+          <label class="form-label">Stream Port</label>
+          <input type="number" id="set-camera-port" class="form-input mono" placeholder="8081" />
+        </div>
+
+        <div class="settings-card">
+          <h3>Dashboard</h3>
+          <label class="form-label">Dashboard Name</label>
+          <input type="text" id="set-dashboard-name" class="form-input" placeholder="My Smart Home" />
+          <label class="form-label">Refresh Interval (ms)</label>
+          <input type="number" id="set-refresh" class="form-input" placeholder="5000" />
+        </div>
+
+        <div class="settings-card">
+          <h3>Raspberry Pi</h3>
+          <div class="pi-info" id="pi-info">
+            <div class="pi-row"><span class="pi-key">Hostname</span><span class="pi-val" id="pi-hostname">—</span></div>
+            <div class="pi-row"><span class="pi-key">Model</span><span class="pi-val" id="pi-model">—</span></div>
+            <div class="pi-row"><span class="pi-key">Uptime</span><span class="pi-val" id="pi-uptime">—</span></div>
+            <div class="pi-row"><span class="pi-key">Temperature</span><span class="pi-val" id="pi-temp">—</span></div>
+          </div>
+        </div>
+
+        <div class="settings-card full-width">
+          <h3>Backup & Export</h3>
+          <p style="opacity:.6; font-size:.9rem; margin-bottom:1rem">Export your automations and settings as a JSON backup file.</p>
+          <a class="btn btn-ghost" href="/api/settings/export" download="ha-dashboard-backup.json">⬇ Export Backup</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

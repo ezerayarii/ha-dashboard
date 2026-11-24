@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# secrets: copy .env.example to .env
+.env
+.env.*
+!.env.example
+
+# runtime data written by the app (settings and local automation rules)
+config/
+
+# logs / OS files
+*.log
+.DS_Store
+Thumbs.db
+
+# old README kept locally
+README.old.md
