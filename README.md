@@ -103,4 +103,4 @@ Built with AI coding tools.
 
 ## License
 
-MIT (add a LICENSE file before publishing).
+MIT, see [LICENSE](LICENSE).
